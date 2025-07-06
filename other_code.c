@@ -6,6 +6,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+struct Student {
+    int id;
+    char name[20];
+    int age;
+};
+
+void searchForStruct() {
+    struct Student studentList[5];
+
+    for (int i = 0; i < 5; i++) {
+        printf("Enter student ID %d:", i + 1);
+        scanf("%d", &studentList[i].id);
+
+        printf("Enter student Name %d:", i + 1);
+        scanf("%s", studentList[i].name);
+
+        printf("Enter student Age %d:", i + 1);
+        scanf("%d", &studentList[i].age);
+    }
+
+    int id;
+
+    printf("Enter student ID:");
+    scanf("%d", &id);
+
+    for (int i = 0; i < 5; i++) {
+        if (studentList[i].id == id) {
+            printf("{ id: %d, name: \"%s\", age: %d } ", studentList[i].id, studentList[i].name, studentList[i].age);
+        }
+    }
+}
+
 int hasPairBruteForce(int arr[], int n, int K) {
     for (int i = 0; i < n - 1; i++) {
         for (int j = i + 1; j < n; j++) {
@@ -83,6 +115,24 @@ int demo() {
     }
 
     return 0;
+}
+
+void sortArray() {
+    int arr[10] = { 5, 6, 8, 10, 30, 15, 10, 13, 6, 9 };
+
+    for (int i = 1; i < 10; i++) {
+        for (int j = 0; j < 10 - i; j++) {
+            if (arr[j] > arr[j + 1]) {
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+
+    for (int i = 0; i < 10; i++) {
+        printf("%d ", arr[i]);
+    }
 }
 
 int main(void) {
