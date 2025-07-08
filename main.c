@@ -1,85 +1,102 @@
 #include <stdio.h>
-#include <stdlib.h>
 
-struct Node {
-    int data;
-    struct Node* next;
-};
-
-struct Node* createNode(int value) {
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node*));
-
-    if (newNode == NULL) {
-        exit(1);
-    }
-
-    newNode->data = value;
-    newNode->next = NULL;
-    return newNode;
+void swap(int *a, int *b) {
+    int t = *a; *a = *b; *b = t;
 }
 
-void appendNode(struct Node** head, int value) {
-    struct Node* newNode = createNode(value);
+void merge(int arr[], int left, int mid, int right) {
+    int i, j, k;
+    int n1, n2;
 
-    if (*head == NULL) {
-        *head = newNode;
-        return;
+    n1 = mid - left + 1;
+    n2 = right - mid;
+
+    int L[n1];
+    int R[n2];
+
+    for (i = 0; i < n1; i++) {
+        L[i] = arr[left + i];
     }
 
-    struct Node* temp = *head;
-    while (temp->next != NULL) {
-        temp = temp->next;
+    for (j = 0; j < n2; j++) {
+        R[j] = arr[mid + 1 + j];
     }
 
-    temp->next = newNode;
+    i = 0;
+    j = 0;
+    k = left;
+
+    while (i < n1 && j < n2) {
+        if (L[i] < R[j]) {
+            arr[k] = L[i];
+            i++;
+        } else {
+            arr[k] = R[j];
+            j++;
+        }
+
+        k++;
+    }
+
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
 }
 
-void printList(struct Node* head) {
-    struct Node* temp = head;
+void mergeSort(int arr[], int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
 
-    while (temp != NULL) {
-        printf("%d -> ", temp->data);
-        temp = temp->next;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+
+        merge(arr, left, mid, right);
     }
-
-    printf("NULL\n");
 }
 
-void deleteNode(struct Node** head, int key) {
-    struct Node* temp = *head;
-    struct Node* prev = NULL;
+int partition(int arr[], int low, int high) {
+    int pivot = arr[high];
+    int i = low - 1;
 
-    if (temp != NULL && temp->data == key) {
-        *head = temp->next;
-        free(temp);
-        return;
+    for (int j = low; j < high; j++) {
+        if (arr[j] < pivot) {
+            i++;
+            swap(&arr[i], &arr[j]);
+        }
     }
 
-    while (temp != NULL && temp->data != key) {
-        prev = temp;
-        temp = temp->next;
-    }
-
-    if (temp == NULL) {
-        printf("Del thay");
-        return;
-    }
-
-    prev->next = temp->next;
-    free(temp);
+    swap(&arr[i + 1], &arr[high]);
+    return i + 1;
 }
+
+void quickSort(int arr[], int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
 
 int main() {
-    struct Node* head = NULL;
+    int arr[] = { 1, 4, 2, 7, 5, 8, 3, 6, 9 };
+    int n = sizeof(arr) / sizeof(int);
 
-    appendNode(&head, 10);
-    appendNode(&head, 25);
-    appendNode(&head, 50);
+    // quickSort(arr, 0, n);
+    mergeSort(arr, 0, n - 1);
 
-    printList(head);
-
-    deleteNode(&head, 25);
-    printList(head);
+    for (int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
 
     return 0;
 }
