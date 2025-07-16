@@ -1,114 +1,107 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-struct Node {
-    int data;
-    struct Node* next;
-};
+typedef struct Stack {
+    int cap;
+    int top;
+    char* data;
+} Stack;
 
-struct Node* createNode(int value) {
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node*));
-
-    if (newNode == NULL) {
-        exit(1);
-    }
-
-    newNode->data = value;
-    newNode->next = NULL;
-    return newNode;
+void init(Stack *s, int maxLength) {
+    s->top = -1;
+    s->cap = maxLength;
+    s->data = malloc(maxLength*sizeof(char));
 }
 
-void appendNode(struct Node** head, int value) {
-    struct Node* newNode = createNode(value);
+int isEmpty(Stack *s) {
+    return s->top == -1;
+}
 
-    if (*head == NULL) {
-        *head = newNode;
+int isFull(Stack *s) {
+    return s->top == s->cap - 1;
+}
+
+void push(Stack *s, char value) {
+    if (!isFull(s)) {
+        s->top++;
+        s->data[s->top] = value;
         return;
     }
 
-    struct Node* temp = *head;
-    while (temp->next != NULL) {
-        temp = temp->next;
-    }
-
-    temp->next = newNode;
+    printf("Stack overflow\n");
 }
 
-void printList(struct Node* head) {
-    struct Node* temp = head;
-
-    while (temp != NULL) {
-        printf("%d -> ", temp->data);
-        temp = temp->next;
+char pop(Stack *s) {
+    if (!isEmpty(s)) {
+        char value = s->data[s->top];
+        s->top--;
+        return value;
     }
 
-    printf("NULL\n");
+    printf("Stack underflow");
+    return '\0';
 }
 
-void deleteNode(struct Node** head, int key) {
-    struct Node* temp = *head;
-    struct Node* prev = NULL;
-
-    if (temp != NULL && temp->data == key) {
-        *head = temp->next;
-        free(temp);
-        return;
+char peek(Stack *s) {
+    if (!isEmpty(s)) {
+        return s->data[s->top];
     }
 
-    while (temp != NULL && temp->data != key) {
-        prev = temp;
-        temp = temp->next;
-    }
-
-    if (temp == NULL) {
-        printf("Del thay");
-        return;
-    }
-
-    prev->next = temp->next;
-    free(temp);
+    printf("Stack underflow");
+    return '\0';
 }
 
-void insertionSortLinkedList(struct Node** head) {
-    struct Node* temp = *head;
+int priority(char op) {
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    return 0;
+}
 
-    struct Node* sortList = NULL;
-
-    while (temp != NULL) {
-        struct Node* nextNode = temp->next;
-
-        if (sortList == NULL || sortList->data >= temp->data) {
-            temp->next = sortList;
-            sortList = temp;
-        } else {
-            struct Node* currentNode = sortList;
-            while (currentNode->next != NULL && currentNode->next->data < temp->data) {
-                currentNode = currentNode->next;
+void fromInfix2Postfix(Stack s, char input[]) {
+    char result[100];
+    int k = 0;
+    char c;
+    for (int i = 0; input[i] != '\0'; i++) {
+        c = input[i];
+        if (isdigit(c)) {
+            result[k] = c;
+            k++;
+        } else if (c == '(') {
+            push(&s, c);
+        } else if (c == ')') {
+            while (!isEmpty(&s) && peek(&s) != '(') {
+                result[k] = pop(&s);
+                k++;
             }
-
-            temp->next = currentNode->next;
-            currentNode->next = temp;
+            pop(&s);
+        } else if (c == '+' || c == '-' || c == '*' || c == '/') {
+            while (!isEmpty(&s) && priority(peek(&s)) >= priority(c)) {
+                result[k] = pop(&s);
+                k++;
+            }
+            push(&s, c);
         }
-
-        temp = nextNode;
     }
 
-    *head = sortList;
+    while (!isEmpty(&s)) {
+        result[k] = pop(&s);
+        k++;
+    }
+
+    result[k] = '\0';
+
+    for (int i = 0; result[i] != '\0'; i++) {
+        printf("%c", result[i]);
+    }
 }
 
 int main() {
-    struct Node* head = NULL;
+    Stack s;
 
-    appendNode(&head, 10);
-    appendNode(&head, 50);
-    appendNode(&head, 25);
-    appendNode(&head, 15);
-    appendNode(&head, 20);
+    init(&s, 100);
 
-    printList(head);
-
-    insertionSortLinkedList(&head);
-    printList(head);
+    fromInfix2Postfix(s, "2+(3*1)-9");
 
     return 0;
 }
