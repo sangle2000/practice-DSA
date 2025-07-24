@@ -1,124 +1,68 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct Person {
+typedef struct Student {
+    int id;
     char* name;
-    int age;
-    struct Person* next;
-} Person;
+    char* status;
+    int avg;
+} Student;
 
-typedef struct QueuePerson {
-    Person* head;
-    Person* tail;
-} QueuePerson;
+Student* createNewStudent(int id, char name[], char status[], int avg) {
+    Student* newStudent = (Student*)malloc(sizeof(Student));
 
-Person* createPersonQueue(char name[], int age) {
-    Person* newPerson = (Person*)malloc(sizeof(Person));
-
-    if (newPerson == NULL) {
-        printf("Memory is not enough!");
+    if (newStudent == NULL) {
+        printf("Not enough memory!\n");
         exit(1);
     }
 
-    newPerson->name = strdup(name);
-    newPerson->age = age;
-    newPerson->next = NULL;
+    newStudent->id = id;
+    newStudent->name = strdup(name);
+    newStudent->status = strdup(status);
+    newStudent->avg = avg;
 
-    return newPerson;
+    return newStudent;
 }
 
-int isEmpty(QueuePerson* queuePerson) {
-    return queuePerson->head == NULL;
-}
-
-void enqueuePerson(QueuePerson* queuePerson, char name[], int age) {
-    Person* newPerson = createPersonQueue(name, age);
-    if (queuePerson->head == NULL) {
-        queuePerson->head = newPerson;
-        queuePerson->tail = newPerson;
-        return;
-    }
-
-    queuePerson->tail->next = newPerson;
-    queuePerson->tail = newPerson;
-}
-
-void dequeuePerson(QueuePerson* queueOldPerson, QueuePerson* queueNormalPerson) {
-    Person* temp = NULL;
-
-    if (!isEmpty(queueOldPerson)) {
-        temp = queueOldPerson->head;
-        queueOldPerson->head = queueOldPerson->head->next;
-        if (queueOldPerson->head == NULL) queueOldPerson->tail = NULL;
-    } else if (!isEmpty(queueNormalPerson)) {
-        temp = queueNormalPerson->head;
-        queueNormalPerson->head = queueNormalPerson->head->next;
-        if (queueNormalPerson->head == NULL) queueNormalPerson->tail = NULL;
-    }
-
+Student** addStudent(Student** students, int* size, int id, char name[], char status[], int avg) {
+    Student** temp = realloc(students, (*size + 1) * sizeof(Student*));
     if (temp == NULL) {
-        printf("Queue is empty!\n");
+        printf("Not enough memory!\n");
+        return students;
+    }
+    students = temp;
+
+    students[*size] = createNewStudent(id, name, status, avg);
+    (*size)++;
+
+    return students;
+}
+
+void printStudent(Student** students, int size) {
+    printf("Print list:\n");
+    if (size == 0) {
+        printf("Student list is empty!\n");
         return;
     }
 
-    printf("Person: %s (age %d)\n", temp->name, temp->age);
-    free(temp->name);
-    free(temp);
+    for (int i = 0; i < size; i++) {
+        printf("%d - %s - %s - %d\n",
+            students[i]->id, students[i]->name, students[i]->status, students[i]->avg);
+    }
 }
 
 int main(void) {
-    // Cấp phát queue trước khi dùng
-    QueuePerson* queueOldPerson = (QueuePerson*)malloc(sizeof(QueuePerson));
-    queueOldPerson->head = queueOldPerson->tail = NULL;
+    Student** students = NULL;
+    int size = 0;
 
-    QueuePerson* queueNormalPerson = (QueuePerson*)malloc(sizeof(QueuePerson));
-    queueNormalPerson->head = queueNormalPerson->tail = NULL;
+    students = addStudent(students, &size, 1, "Sang", "Available", 10);
+    students = addStudent(students, &size, 2, "Le", "Available", 9);
+    students = addStudent(students, &size, 3, "Ha", "Available", 5);
+    students = addStudent(students, &size, 4, "Thanh", "Available", 6);
 
-    int chosen = -1;
+    printStudent(students, size);
 
-    while (chosen != 0) {
-        printf("1. Add person\n");
-        printf("2. Get person\n");
-        printf("0. Exit\n");
-
-        scanf("%d", &chosen);
-        getchar();  // để loại bỏ newline sau scanf
-
-        switch (chosen) {
-            case 1: {
-                char personName[20];
-                int age;
-
-                printf("Enter name: ");
-                fgets(personName, sizeof(personName), stdin);
-                personName[strcspn(personName, "\n")] = '\0';
-
-                printf("Enter age: ");
-                scanf("%d", &age);
-                getchar(); // xóa newline
-
-                if (age >= 60) {
-                    enqueuePerson(queueOldPerson, personName, age);
-                } else {
-                    enqueuePerson(queueNormalPerson, personName, age);
-                }
-                break;
-            }
-
-            case 2:
-                dequeuePerson(queueOldPerson, queueNormalPerson);
-                break;
-
-            case 0:
-                printf("Exit!\n");
-                break;
-
-            default:
-                printf("Invalid input!\n");
-        }
-    }
-
+    // TODO: free all memory
     return 0;
 }
